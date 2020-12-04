@@ -19,21 +19,21 @@ arch = {"vgg16":25088,
         "alexnet":9216}
 
 
-def load_data(where  = "./flowers" ):
+def load_data(flowers  = "./flowers" ):
     '''
-    Arguments : the datas' path
+    Arguments : the datas' path name
     Returns : The loaders for the train, validation and test datasets
-    This function receives the location of the image files, applies the necessery transformations (rotations,flips,normalizations and crops) and converts the images to tensor in order to be able to be fed into the neural network
+    This function receives the location of the image files, applies the necessery transformations (rotations,flips,normalizations and crops)
+    and converts the images to tensor in order to be able to be fed into the neural network
+    
     '''
 
-    data_dir = where
+    data_dir = flowers
     train_dir = data_dir + '/train'
     valid_dir = data_dir + '/valid'
     test_dir = data_dir + '/test'
 
-    #Apply the required transfomations to the test dataset in order to maximize the efficiency of the learning
-    #process
-
+    #Apply the required transfomations to the test dataset in order to maximize the efficiency of learning
 
     train_transforms = transforms.Compose([transforms.RandomRotation(50),
                                            transforms.RandomResizedCrop(224),
@@ -57,25 +57,24 @@ def load_data(where  = "./flowers" ):
                                                                      [0.229, 0.224, 0.225])])
 
 
-    # TODO: Load the datasets with ImageFolder
+    # Load the datasets
     train_data = datasets.ImageFolder(train_dir, transform=train_transforms)
     validation_data = datasets.ImageFolder(valid_dir, transform=validation_transforms)
     test_data = datasets.ImageFolder(test_dir ,transform = test_transforms)
 
-    # TODO: Using the image datasets and the trainforms, define the dataloaders
-    # The data loaders are going to use to load the data to the NN(no shit Sherlock)
+    # Using the image datasets and the trainforms, define the dataloaders
+    # The data loaders are going to use to load the data to the NN
     trainloader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
     vloader = torch.utils.data.DataLoader(validation_data, batch_size =32,shuffle = True)
     testloader = torch.utils.data.DataLoader(test_data, batch_size = 20, shuffle = True)
 
-
-
     return trainloader , vloader, testloader
 
 
-def nn_setup(structure='densenet121',dropout=0.5, hidden_layer1 = 120,lr = 0.001,power=gpu):
+def nn_setup(structure='vgg16',dropout=0.5, hidden_layer1 = 120,lr = 0.001,power=gpu):
     '''
-    Arguments: The architecture for the network(alexnet,densenet121,vgg16), the hyperparameters for the network (hidden layer 1 nodes, dropout and learning rate) and whether to use gpu or not
+    Arguments: The architecture for the network(alexnet,densenet121,vgg16), the hyperparameters for the network (hidden layer 1 nodes, dropout and learning rate)
+    and whether to use gpu or not
     Returns: The set up model, along with the criterion and the optimizer fo the Training
     '''
 
@@ -87,7 +86,8 @@ def nn_setup(structure='densenet121',dropout=0.5, hidden_layer1 = 120,lr = 0.001
         model = models.alexnet(pretrained = True)
     else:
         print("Im sorry but {} is not a valid model.Did you mean vgg16,densenet121,or alexnet?".format(structure))
-
+        
+    # Freeze    
     for param in model.parameters():
         param.requires_grad = False
 
@@ -104,7 +104,6 @@ def nn_setup(structure='densenet121',dropout=0.5, hidden_layer1 = 120,lr = 0.001
             ('output', nn.LogSoftmax(dim=1))
                           ]))
 
-
         model.classifier = classifier
         criterion = nn.NLLLoss()
         optimizer = optim.Adam(model.classifier.parameters(), lr )
@@ -117,7 +116,7 @@ def nn_setup(structure='densenet121',dropout=0.5, hidden_layer1 = 120,lr = 0.001
 
 def train_network(model, criterion, optimizer, epochs = 3, print_every=20, loader=trainloader, power='gpu'):
     '''
-    Arguments: The model, the criterion, the optimizer, the number of epochs, teh dataset, and whether to use a gpu or not
+    Arguments: The model, the criterion, the optimizer, the number of epochs, the dataset, and whether to use a gpu or not
     Returns: Nothing
     This function trains the model over a certain number of epochs and displays the training,validation and accuracy every "print_every" step using cuda if specified. The training method is specified by the criterion and the optimizer which are NLLLoss and Adam respectively
     '''
@@ -147,7 +146,6 @@ def train_network(model, criterion, optimizer, epochs = 3, print_every=20, loade
                 vlost = 0
                 accuracy=0
 
-
                 for ii, (inputs2,labels2) in enumerate(vloader):
                     optimizer.zero_grad()
                     if torch.cuda.is_available():
@@ -164,22 +162,19 @@ def train_network(model, criterion, optimizer, epochs = 3, print_every=20, loade
                 vlost = vlost / len(vloader)
                 accuracy = accuracy /len(vloader)
 
-
-
                 print("Epoch: {}/{}... ".format(e+1, epochs),
                       "Loss: {:.4f}".format(running_loss/print_every),
                       "Validation Lost {:.4f}".format(vlost),
                        "Accuracy: {:.4f}".format(accuracy))
 
-
                 running_loss = 0
 
 
-    print("-------------- Finished training -----------------------")
-    print("Dear User I the ulitmate NN machine trained your model. It required")
+    print("-------------- Training complete -----------------------")
+    print("This model required the following: ")
     print("----------Epochs: {}------------------------------------".format(epochs))
-    print("----------Steps: {}-----------------------------".format(steps))
-    print("That's a lot of steps")
+    print("----------Steps:  {}------------------------------------".format(steps))
+    print("Have a nice day!")
 
 
 def save_checkpoint(path='checkpoint.pth',structure ='densenet121', hidden_layer1=120,dropout=0.5,lr=0.001,epochs=12):
@@ -205,7 +200,7 @@ def load_checkpoint(path='checkpoint.pth'):
     Arguments: The path of the checkpoint file
     Returns: The Neural Netowrk with all hyperparameters, weights and biases
     '''
-    checkpoint = torch.load(path)
+    checkpoint = torch.load(workout)
     structure = checkpoint['structure']
     hidden_layer1 = checkpoint['hidden_layer1']
     dropout = checkpoint['dropout']
@@ -228,8 +223,7 @@ def process_image(image_path):
         path = str(i)
     img = Image.open(i) # Here we open the image
 
-    make_img_good = transforms.Compose([ # Here as we did with the traini ng data we will define a set of
-        # transfomations that we will apply to the PIL image
+    make_img_good = transforms.Compose([ # Same as before, bring it in and transform it
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
