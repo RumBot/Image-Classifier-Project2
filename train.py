@@ -20,7 +20,7 @@ args = argparse.ArgumentParser(description='train.py')
 # Command Line ardguments
 
 ap.add_argument('data_dir', nargs='*', action="store", default="./flowers/")
-ap.add_argument('--gpu', dest="gpu", action="store", default="gpu")
+ap.add_argument('--gpu', dest="gpu", action="store", default="cpu")
 ap.add_argument('--save_dir', dest="save_dir", action="store", default="./checkpoint.pth")
 ap.add_argument('--learning_rate', dest="learning_rate", action="store", default=0.001)
 ap.add_argument('--dropout', dest = "dropout", action = "store", default = 0.5)
