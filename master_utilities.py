@@ -14,9 +14,7 @@ import PIL
 from PIL import Image
 import argparse
 
-arch = {"vgg16":25088,
-        "densenet121":1024,
-        "alexnet":9216}
+arch = {"vgg16":25088,"densenet121":1024,"alexnet":9216}
 
 print("Master Utilities running...")
 
@@ -74,7 +72,7 @@ def load_data(flowers  = "./flowers" ):
     return trainloader , vloader, testloader
 
 
-def nn_setup(structure='densenet121',dropout=0.5, hidden_layer1 = 120,lr = 0.001,power='cpu'):
+def nn_setup(structure='vgg16',dropout=0.5, hidden_layer1 = 120,lr = 0.001,power='cpu'):
     '''
     Arguments: The architecture for the network(alexnet,densenet121,vgg16), the hyperparameters for the network (hidden layer 1 nodes, dropout and learning rate) and whether to use gpu or not
     Returns: The set up model, along with the criterion and the optimizer fo the Training
@@ -95,7 +93,7 @@ def nn_setup(structure='densenet121',dropout=0.5, hidden_layer1 = 120,lr = 0.001
         from collections import OrderedDict
         classifier = nn.Sequential(OrderedDict([
             ('dropout',nn.Dropout(dropout)),
-            ('inputs', nn.Linear(arch['structure'], hidden_layer1)),
+            ('inputs', nn.Linear(arch['vgg16'], hidden_layer1)),
             ('relu1', nn.ReLU()),
             ('hidden_layer1', nn.Linear(hidden_layer1, 90)),
             ('relu2',nn.ReLU()),
@@ -183,7 +181,7 @@ def train_network(model, criterion, optimizer, epochs = 3, print_every=20, loade
     print("Have a nice day!")
 
 
-def save_checkpoint(path='checkpoint.pth',structure ='densenet121', hidden_layer1=120,dropout=0.5,lr=0.001,epochs=12):
+def save_checkpoint(path='checkpoint.pth',structure ='vgg16', hidden_layer1=120,dropout=0.5,lr=0.001,epochs=12):
     '''
     Arguments: The saving path and the hyperparameters of the network
     Returns: Nothing
@@ -192,12 +190,12 @@ def save_checkpoint(path='checkpoint.pth',structure ='densenet121', hidden_layer
     model.class_to_idx = train_data.class_to_idx
     model.cpu
     torch.save({'structure' :structure,
-                'hidden_layer1':hidden_layer1,
-                'dropout':dropout,
-                'lr':lr,
-                'nb_of_epochs':epochs,
-                'state_dict':model.state_dict(),
-                'class_to_idx':model.class_to_idx},
+                'hidden_layer1' :hidden_layer1,
+                'dropout' :dropout,
+                'lr' :lr,
+                'nb_of_epochs' :epochs,
+                'state_dict' :model.state_dict(),
+                'class_to_idx' :model.class_to_idx},
                 path)
 
 
